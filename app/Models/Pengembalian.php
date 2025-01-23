@@ -33,4 +33,8 @@ class Pengembalian extends Model
     {
         return $this->belongsTo(barangInventaris::class, 'br_kode', 'br_kode');
     }
+    public function peminjaman()
+    {
+        return $this->belongsTo(Peminjaman::class, 'pb_id', 'pb_id');
+    }
 }

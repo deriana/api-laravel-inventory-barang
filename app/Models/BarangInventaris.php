@@ -31,4 +31,9 @@ class BarangInventaris extends Model
     {
         return $this->hasMany(PeminjamanBarang::class, 'br_kode', 'br_kode');
     }
+
+    public function jenisBarang()
+    {
+        return $this->belongsTo(JenisBarang::class, 'jns_brg_kode', 'jns_brg_kode');
+    }
 }

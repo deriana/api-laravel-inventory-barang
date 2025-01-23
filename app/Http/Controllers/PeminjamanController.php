@@ -68,22 +68,11 @@ class PeminjamanController extends Controller
                     ->update(['br_status' => '0']);
             }
 
-            $lastKembaliId = Pengembalian::max('kembali_id'); 
-            $nextIdNumber = (int) substr($lastKembaliId, 2);
-            $newKembaliId = 'KB' . str_pad($nextIdNumber + 1, 3, '0', STR_PAD_LEFT);
-            Pengembalian::create([
-                'kembali_id' => $newKembaliId,
-                'pb_id' => $newPbId,
-                'user_id' => $validated['user_id'],
-                'kembali_tgl' => null,
-                'kembali_sts' => 0,
-            ]);
-
             DB::commit();
 
             return response()->json([
                 'status' => 'success',
-                'message' => 'Peminjaman berhasil dibuat dan pengembalian dicatat',
+                'message' => 'Peminjaman berhasil dibuat',
                 'data' => $peminjaman->load('barangInventaris'),
             ], 201);
         } catch (\Exception $e) {
@@ -120,101 +109,28 @@ class PeminjamanController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
-    {
-        DB::beginTransaction();
-    
-        try {
-            $validated = $request->validate([
-                'kembali_tgl' => 'required|date', 
-            ]);
-    
-            $peminjaman = Peminjaman::where('pb_id', $id)->first();
-    
-            if (!$peminjaman) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Peminjaman dengan ID tersebut tidak ditemukan',
-                ], 404);
-            }
-    
-            $pengembalian = Pengembalian::where('pb_id', $id)->first();
-    
-            if (!$pengembalian) {
-                $newKembaliId = 'KB' . str_pad(Pengembalian::count() + 1, 3, '0', STR_PAD_LEFT);
-    
-                $pengembalian = Pengembalian::create([
-                    'kembali_id' => $newKembaliId,
-                    'pb_id' => $id,
-                    'user_id' => $peminjaman->user_id,
-                    'kembali_tgl' => $validated['kembali_tgl'],
-                    'kembali_sts' => 0, 
-                ]);
-            } else {
-                $pengembalian->update([
-                    'kembali_tgl' => $validated['kembali_tgl'],
-                    'kembali_sts' => 1, 
-                ]);
-            }
-    
-            $barangPeminjaman = PeminjamanBarang::where('pb_id', $id)->get();
-            foreach ($barangPeminjaman as $peminjamanBarang) {
-                $barang = BarangInventaris::where('br_kode', $peminjamanBarang->br_kode)->first();
-                if ($barang) {
-                    $barang->update([
-                        'br_status' => 1, 
-                    ]);
-                }
-            }
-    
-            $peminjaman->update([
-                'pb_stat' => 0, 
-            ]);
-    
-            PeminjamanBarang::where('pb_id', $id)->update([
-                'pdb_sts' => 0, 
-            ]);
-    
-            DB::commit();
-    
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Peminjaman dan pengembalian berhasil diperbarui',
-            ], 200);
-        } catch (\Exception $e) {
-            DB::rollBack(); 
-    
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Terjadi kesalahan saat mengupdate pengembalian',
-                'error' => $e->getMessage(),
-            ], 500);
-        }
-    }
-    
 
     /**
      * Remove the specified resource from storage.
      */
     public function destroy(string $id)
     {
-        DB::beginTransaction(); 
-    
+        DB::beginTransaction();
+
         try {
             PeminjamanBarang::where('pb_id', $id)->delete();
-    
+
             Pengembalian::where('pb_id', $id)->delete();
-    
-            $peminjaman = Peminjaman::findOrFail($id);  
+
+            $peminjaman = Peminjaman::findOrFail($id);
             $peminjaman->delete();
-    
+
             DB::commit();
-    
+
             return response()->json([
                 'status' => 'success',
                 'message' => 'Data peminjaman beserta seluruh kaitannya berhasil dihapus.',
             ], 200);
-            
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json([
@@ -224,5 +140,4 @@ class PeminjamanController extends Controller
             ], 500);
         }
     }
-    
 }

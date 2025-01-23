@@ -17,7 +17,6 @@ class AuthController extends Controller
                 'user_nama' => 'required|string|max:50',
                 'user_email' => 'required|string|email|max:100|unique:tm_user,user_email',
                 'password'  => 'required|string', 
-                'user_hak'  => 'required|string|max:2',
             ]);
             
             $latestUser = User::latest('user_id')->first(); 
@@ -28,7 +27,7 @@ class AuthController extends Controller
                 'user_nama' => $data['user_nama'],
                 'user_email' => $data['user_email'],
                 'user_pass' => Hash::make($data['password']),  
-                'user_hak'  => $data['user_hak'],
+                'user_hak'  => 'Us',
                 'user_sts'  => '1', 
             ]);
 
@@ -68,7 +67,7 @@ class AuthController extends Controller
             }
 
             if (!Hash::check($data['user_pass'], $user->user_pass)) {
-                return response()->json(['message' => 'Invalid credentials'], 401);
+                return response()->json(['message' => 'Username Or Passwor is Incorect'], 401);
             }
 
             $token = $user->createToken('user-token')->plainTextToken;
