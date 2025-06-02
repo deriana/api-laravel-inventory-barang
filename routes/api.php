@@ -19,11 +19,11 @@ Route::put('/change-role/{user_id}', [AuthController::class, 'changeRole'])
     ->middleware(['auth:sanctum', RoleCheck::class . ':Ad']);
 
 // // Public Routes (bisa diakses siapa saja)
-// Route::apiResource('jenis_barang', JenisBarangController::class);
-// Route::apiResource('barang', BarangInventarisController::class);
-// Route::apiResource('peminjaman', PeminjamanController::class);
-// Route::apiResource('pengembalian', PengembalianController::class);
-// Route::apiResource('user', UserController::class);
+Route::apiResource('jenis_barang', JenisBarangController::class);
+Route::apiResource('barang', BarangInventarisController::class);
+Route::apiResource('peminjaman', PeminjamanController::class);
+Route::apiResource('pengembalian', PengembalianController::class);
+Route::apiResource('user', UserController::class);
 
 // Laporan Routes - Hanya Admin dan Super Admin yang bisa mengakses
 Route::middleware(['auth:sanctum', RoleCheck::class . ':Ad'])->group(function () {
